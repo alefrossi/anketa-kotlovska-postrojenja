@@ -6,6 +6,7 @@
  * Zaglavlja kolona se kreiraju automatski iz pristiglih upitnika.
  */
 const SHEET_ID = '1jFLcj7ErQh0pYMuyHFpG0tQxZqIbstX_Yv0W9f9NGAM'; // tabela "Upitnik kotlovska postrojenja – odgovori"
+const VERZIJA = '2026-11-16 PDF-original';  // vidljivo u tabeli – potvrđuje da radi nova skripta
 const SHEET_FIRME = 'Privredni subjekti';
 const SHEET_KOTLOVI = 'Kotlovi';
 const PDF_FOLDER_NAZIV = 'Upitnik kotlovska postrojenja – PDF potvrde';
@@ -20,6 +21,8 @@ function doPost(e) {
     data = JSON.parse(e.postData.contents);
     if (data.hp) return json_({ ok: true });  // popunjeno skriveno polje = spam robot, ignoriši
     if (!data.firma || !data.firma['Šifra']) return json_({ ok: false, error: 'neispravan zahtjev' });
+    if (!data.pdf && data.firma['PDF potvrda'] === undefined) data.firma['PDF potvrda'] = 'stara verzija forme (bez PDF-a)';
+    data.firma['Verzija skripte'] = VERZIJA;
     const ss = SpreadsheetApp.openById(SHEET_ID);
     upisi_(ss, SHEET_FIRME, [data.firma]);
     upisi_(ss, SHEET_KOTLOVI, data.kotlovi || []);

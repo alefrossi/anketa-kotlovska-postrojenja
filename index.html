@@ -190,9 +190,14 @@ const clean=o=>(o||"").replace(/^\*/,"");
 const Store={kind:SCRIPT_URL?"gas":"local",admin:false,
   async init(){},
   async save(r){
-    let pdf="";
-    try{ r._pdf=await napraviPdf(r); pdf=uBase64(r._pdf); }catch(e){ console.warn("PDF potvrda nije napravljena:",e); }
-    const body=JSON.stringify({firma:flatFirma(r),kotlovi:flatKotlovi(r),pdf,hp:(document.getElementById("website")||{}).value||""});
+    let pdf="", pdfStatus="original";
+    for(let pokusaj=0;pokusaj<2&&!pdf;pokusaj++){
+      try{ r._pdf=await napraviPdf(r); pdf=uBase64(r._pdf); }
+      catch(e){ pdfResursi=null; pdfStatus="greška u formi: "+(e&&e.message||e); console.warn("PDF potvrda nije napravljena:",e); }
+    }
+    if(pdf) pdfStatus="original";
+    const firmaRed=flatFirma(r); firmaRed["PDF potvrda"]=pdfStatus;
+    const body=JSON.stringify({firma:firmaRed,kotlovi:flatKotlovi(r),pdf,hp:(document.getElementById("website")||{}).value||""});
     if(!SCRIPT_URL){const a=ls.get("upitnici_demo")||[];a.push(r);ls.set("upitnici_demo",a);return}
     try{
       const res=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});
