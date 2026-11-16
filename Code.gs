@@ -3,6 +3,7 @@
  * Tabela ima dva sheeta: "Privredni subjekti" (red po upitniku) i "Kotlovi" (red po kotlu).
  * Zaglavlja kolona se kreiraju automatski iz prvog pristiglog upitnika.
  */
+const SHEET_ID = '1jFLcj7ErQh0pYMuyHFpG0tQxZqIbstX_Yv0W9f9NGAM'; // tabela "Upitnik kotlovska postrojenja – odgovori"
 const SHEET_FIRME = 'Privredni subjekti';
 const SHEET_KOTLOVI = 'Kotlovi';
 
@@ -13,7 +14,7 @@ function doPost(e) {
     const data = JSON.parse(e.postData.contents);
     if (data.hp) return json_({ ok: true });  // popunjeno skriveno polje = spam robot, ignoriši
     if (!data.firma || !data.firma['Šifra']) return json_({ ok: false, error: 'neispravan zahtjev' });
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const ss = SpreadsheetApp.openById(SHEET_ID);
     upisi_(ss, SHEET_FIRME, [data.firma]);
     upisi_(ss, SHEET_KOTLOVI, data.kotlovi || []);
     return json_({ ok: true, sifra: data.firma['Šifra'] });
