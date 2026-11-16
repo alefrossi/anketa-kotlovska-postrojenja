@@ -282,7 +282,6 @@ function rows(fields,data,pfx,kIdx){
 let sent=null;
 function renderForm(){
   const S=$("#sheet"); S.replaceChildren();
-  S.append(h("div",{class:"runhead"},h("span",{},"Anketni upitnik – kotlovska postrojenja"),h("span",{},"Mašinski fakultet, Univerzitet u Sarajevu")));
   S.append(h("div",{class:"top"},
     h("div",{class:"brand"},h("img",{src:"logo-mef.png?v=3",alt:"Logo Mašinskog fakulteta Univerziteta u Sarajevu",width:"72",height:"72",class:"logo"}),h("div",{class:"inst"},"Univerzitet u Sarajevu",h("br"),"Mašinski fakultet",h("br"),"Katedra za energetiku i KGH tehniku")),
     h("div",{class:"code"},"Šifra upitnika",h("i",{},"(dodjeljuje se pri slanju)"),h("div",{class:"box"},sent?sent.id:""))));
