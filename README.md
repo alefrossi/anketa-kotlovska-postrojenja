@@ -17,8 +17,9 @@ Ko vidi odgovore: samo vlasnik Google tabele. „Anyone“ u koraku 3 znači da 
 Nakon izmjene `Code.gs` potrebno je *Deploy → Manage deployments → Edit → New version*.
 
 ## PDF potvrda i e-mail
-Nakon svakog poslanog upitnika skripta:
-- pravi PDF potvrdu (naziv firme, datum unosa, šifra i svi odgovori),
+Pri slanju forma u pregledniku popuni originalni PDF upitnika (`predlozak.pdf`, izvor `predlozak.tex`)
+odgovorima – pozicije polja su u `pozicije.json`, a upis radi `popuni-pdf.js` (pdf-lib). Skripta zatim:
+- prima tu PDF potvrdu (naziv firme, datum unosa, šifra i svi odgovori),
 - sprema je u Drive folder „Upitnik kotlovska postrojenja – PDF potvrde“,
 - šalje je kao prilog na e-mail adresu iz pitanja 1.4.
 

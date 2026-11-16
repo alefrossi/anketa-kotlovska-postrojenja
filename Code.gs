@@ -32,7 +32,10 @@ function doPost(e) {
   // PDF i e-mail: greška ovdje ne poništava upis u tabelu
   const rez = { ok: true, sifra: data.firma['Šifra'], pdf: false, email: '' };
   try {
-    const pdf = napraviPdf_(data);
+    // PDF potvrda iz forme (originalni upitnik popunjen odgovorima); rezervno: HTML verzija iz skripte
+    const pdf = data.pdf
+      ? Utilities.newBlob(Utilities.base64Decode(data.pdf), 'application/pdf', nazivPdf_(data.firma))
+      : napraviPdf_(data);
     folder_().createFile(pdf);
     rez.pdf = true;
     const adresa = izvuciEmail_(data.firma['1.4 Telefon i e-mail adresa']);
@@ -162,6 +165,13 @@ function napraviPdf_(d) {
   const cistiNaziv = String(firma).replace(/[^\wčćžšđČĆŽŠĐ-]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').slice(0, 60) || 'firma';
   const naziv = 'Upitnik_' + cistiNaziv + '_' + datum.replace(/\.$/, '').replace(/\./g, '-') + '_' + sifra + '.pdf';
   return Utilities.newBlob(html, 'text/html', naziv.replace('.pdf', '.html')).getAs('application/pdf').setName(naziv);
+}
+
+function nazivPdf_(f) {
+  const t = new Date(f['Vrijeme slanja'] || new Date());
+  const datum = Utilities.formatDate(t, 'Europe/Sarajevo', 'dd-MM-yyyy');
+  const firma = String(f['1.1 Naziv privrednog subjekta'] || 'firma').replace(/[^\wčćžšđČĆŽŠĐ-]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').slice(0, 60);
+  return 'Upitnik_' + firma + '_' + datum + '_' + f['Šifra'] + '.pdf';
 }
 
 function posaljiEmail_(adresa, d, pdf) {
