@@ -1,0 +1,241 @@
+% =====================================================================
+% Anketni upitnik – kotlovska postrojenja (XeLaTeX, stil pdf-stil)
+% Struktura forme: zaglavlje + šifra, propratno pismo, uputstvo,
+% odjeljci sa uokvirenim poljima i kućicama, saglasnost, ovjera.
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setdefaultlanguage{bosnian}
+\setmainfont{Latin Modern Roman}
+\usepackage{amsmath, amssymb}
+\usepackage[left=2.4cm,right=2.4cm,top=2.6cm,bottom=2.6cm,headheight=14pt]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xltabular}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{enumitem}
+\setlist{itemsep=2pt,topsep=3pt}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!60!black,urlcolor=blue!60!black]{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable,skins}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{needspace}
+\usepackage{caption}
+\usepackage[savepos,abspage]{zref}
+
+% ---------- oznake pozicija za upis odgovora (nevidljive) ----------
+\makeatletter
+\zref@addprop{savepos}{abspage}
+\newcommand{\pos}[1]{\begingroup\edef\x{#1}\expandafter\zsavepos\expandafter{\x}\endgroup}
+\makeatother
+\gdef\curq{x}
+\newcounter{oi}\newcounter{li}
+\newcommand{\setq}[1]{\gdef\curq{#1}\setcounter{oi}{0}\setcounter{li}{0}}
+
+% ---------- boje ----------
+\colorlet{naslov}{blue!50!black}
+\colorlet{podnaslov}{blue!40!black}
+\colorlet{okvir}{gray!55}
+
+% ---------- header / footer ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Anketni upitnik -- kotlovska postrojenja}
+\fancyhead[R]{\small Mašinski fakultet, Univerzitet u Sarajevu}
+\fancyfoot[L]{\footnotesize\color{gray!70!black} Povjerljivo -- isključivo za naučno-istraživačke svrhe}
+\fancyfoot[R]{\footnotesize\pos{PG:\thepage}\phantom{Stranica 1 od 1}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ---------- naslovi odjeljaka (traka kao u formularu) ----------
+\newcommand{\odjeljaknaslov}[2]{%
+  \par\needspace{7\baselineskip}\vspace{12pt}\noindent
+  \colorbox{naslov}{\parbox{\dimexpr\textwidth-2\fboxsep-2pt}{\color{white}\bfseries\strut\,#1\hfill\normalfont\small #2\,}}%
+  \par\nopagebreak\vspace{4pt}}
+
+% ---------- kutije ----------
+\newtcolorbox{napomena}[1][]{colback=orange!8!white, colframe=orange!70!black,
+  fonttitle=\bfseries, title={#1}, breakable, enhanced}
+\newtcolorbox{pismo}{colback=blue!4!white, colframe=blue!55!black, enhanced,
+  boxrule=0.6pt, left=9pt, right=9pt, top=7pt, bottom=7pt}
+\newtcolorbox{uputstvo}{colback=gray!6!white, colframe=gray!50!black, sharp corners,
+  enhanced, boxrule=0.5pt, left=9pt, right=9pt, top=6pt, bottom=6pt,
+  title={Uputstvo za popunjavanje}, fonttitle=\bfseries\small, coltitle=black,
+  colbacktitle=gray!18!white}
+
+% ---------- elementi forme ----------
+% kućica za označavanje
+\newcommand{\cb}{\raisebox{-0.2ex}{\pos{C:\curq:\theoi:s}\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.55pt}\fbox{\rule{0pt}{1.5ex}\hspace{1.5ex}}\pos{C:\curq:\theoi:e}}\hspace{0.4em}}
+% primjer označene kućice za uputstvo
+\newcommand{\cbx}{\raisebox{-0.2ex}{\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.55pt}\fbox{\makebox[1.5ex][c]{\rule{0pt}{1.5ex}\scriptsize$\times$}}}\hspace{0.4em}}
+% linija za kratki upis
+\newcommand{\crta}[1][2.4cm]{\stepcounter{li}\pos{L:\curq:\theli:s}\textcolor{okvir}{\rule[-0.25ex]{#1}{0.5pt}}\pos{L:\curq:\theli:e}}
+% uokvireno polje za upis (visina po potrebi)
+\newcommand{\polje}[1][2.1em]{\raisebox{\dimexpr-\height+1.9ex}{\pos{P:\curq:s}\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.5pt}\color{okvir}\framebox[\linewidth]{\rule{0pt}{#1}}\pos{P:\curq:e}}}
+% ponuđeni odgovori: pola širine / cijela širina
+\newcommand{\opt}[1]{\stepcounter{oi}\makebox[0.49\linewidth][l]{\cb #1}\allowbreak}
+\newcommand{\optw}[1]{\stepcounter{oi}\makebox[\linewidth][l]{\cb #1}\par}
+
+\newcolumntype{Q}{>{\raggedright\arraybackslash}X}
+\renewcommand{\arraystretch}{1.25}
+
+% tabela jednog odjeljka: R.br. | pitanje | polje za odgovor
+\newenvironment{pitanja}
+ {\small\setlength{\LTpre}{0pt}\setlength{\LTpost}{0pt}
+  \xltabular{\textwidth}{@{}p{0.85cm} >{\raggedright\arraybackslash}p{5.9cm} Q@{}}
+  \arrayrulecolor{naslov}
+  \textbf{R.br.} & \textbf{Traženi podatak / pitanje} & \textbf{Odgovor}\\ \midrule
+  \endfirsthead
+  \endhead
+}
+ {\endxltabular\par}
+\newcommand{\q}[3]{\setq{#1}\textbf{\textcolor{naslov}{#1}} & #2 & \setq{#1}#3\\[9pt]}
+
+\begin{document}
+
+% ================= ZAGLAVLJE =================
+\noindent
+\begin{minipage}[t]{0.66\textwidth}
+{\small\scshape Univerzitet u Sarajevu\\ Mašinski fakultet\\
+Katedra za energetiku i KGH tehniku}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.31\textwidth}\raggedleft
+{\footnotesize Šifra upitnika\\[-1pt] \itshape(popunjava istraživač)}\\[3pt]
+{\setlength{\fboxsep}{0pt}\color{naslov}\pos{S:s}\fbox{\rule{0pt}{0.75cm}\hspace{3.4cm}}\pos{S:e}}
+\end{minipage}
+
+\vspace{16pt}
+\begin{center}
+{\LARGE\bfseries\color{naslov} ANKETNI UPITNIK}\\[5pt]
+{\large\color{podnaslov} Prikupljanje tehničkih i pogonskih podataka o kotlovskim postrojenjima}
+\end{center}
+\vspace{6pt}
+
+% ================= PROPRATNO PISMO =================
+\begin{pismo}
+\textbf{Poštovani,}\\[3pt]
+molimo Vas da popunite ovaj upitnik radi prikupljanja tehničkih i pogonskih podataka o kotlovskim postrojenjima. Podaci će se koristiti isključivo u okviru naučno-istraživačkog rada i analize pogonske efikasnosti postrojenja, a u rezultatima će biti prikazani zbirno, bez navođenja naziva privrednog subjekta.
+
+\smallskip
+Popunjavanje upitnika traje približno 15 minuta. Unaprijed se zahvaljujemo na saradnji.
+
+\medskip
+\setq{meta}\begin{tabularx}{\linewidth}{@{}l X@{\hspace{1.2em}}l X@{}}
+\small Rok za dostavu: & \crta[3.6cm] & \small Kontakt istraživača: & \crta[4cm]\\
+\end{tabularx}
+\end{pismo}
+
+% ================= UPUTSTVO =================
+\begin{uputstvo}
+\small
+\begin{itemize}[leftmargin=1.2em]
+  \item Odgovore upisujte čitko, štampanim slovima, u uokvirena polja.
+  \item Kod ponuđenih odgovora označite odgovarajuću kućicu znakom \cbx\hspace{-0.4em}; moguće je označiti više odgovora gdje to odgovara stvarnom stanju.
+  \item Vrijednosti upisujte u jedinicama navedenim uz pitanje; decimalni separator je zarez.
+  \item Ako postrojenje ima \textbf{više kotlova}, odjeljke 2--4 popunite zasebno za svaki kotao (kopirati stranice i upisati redni broj kotla).
+  \item Ako podatak nije poznat ili nije primjenjiv, upišite „nije poznato“ ili „nije primjenjivo“.
+\end{itemize}
+\end{uputstvo}
+
+% ================= 1 =================
+\odjeljaknaslov{1. Opći podaci o privrednom subjektu}{}
+\begin{pitanja}
+\q{1.1}{Naziv privrednog subjekta}{\polje}
+\q{1.2}{Adresa privrednog subjekta}{\polje}
+\q{1.3}{Kontakt osoba (ime, prezime i funkcija)}{\polje}
+\q{1.4}{Telefon i e-mail adresa}{\polje}
+\q{1.5}{Osnovna djelatnost / proizvod}{\polje}
+\end{pitanja}
+
+\clearpage
+% ================= 2 =================
+\odjeljaknaslov{2. Podaci o kotlovskom postrojenju}{Kotao br. \pos{K:2:s}\fcolorbox{white}{white}{\rule{0pt}{1.6ex}\hspace{1.2cm}}\pos{K:2:e}}
+\begin{pitanja}
+\q{2.1}{Ukupan broj kotlova u postrojenju}{\polje}
+\q{2.2}{Proizvođač i model kotla (ako je poznato)}{\polje}
+\q{2.3}{Godina proizvodnje / puštanja u rad}{\polje}
+\q{2.4}{Vrsta kotla i namjena (toplovodni, parni, tehnološki i sl.)}{\polje}
+\q{2.5}{Nazivni kapacitet kotla (kW ili MW; kg/s ili t/h)}{\polje}
+\q{2.6}{Stvarni / radni kapacitet kotla (kW ili MW; kg/s ili t/h)}{\polje}
+\q{2.7}{Prosječan broj radnih sati godišnje (h/god)}{\polje}
+\q{2.8}{Režim rada postrojenja}{\opt{Kontinuirani}\opt{Sezonski}\opt{Povremeni}\opt{Drugo: \crta[1.8cm]}}
+\q{2.9}{Broj kotlova koji istovremeno rade u punom kapacitetu}{\polje}
+\end{pitanja}
+
+% ================= 3 =================
+\odjeljaknaslov{3. Tehnologija sagorijevanja i radni parametri}{Kotao br. \pos{K:3:s}\fcolorbox{white}{white}{\rule{0pt}{1.6ex}\hspace{1.2cm}}\pos{K:3:e}}
+\begin{pitanja}
+\q{3.1}{Tehnologija sagorijevanja uglja/goriva}
+ {\optw{Sagorijevanje na pokretnoj rešetki}\optw{Sagorijevanje u fluidiziranom sloju}\optw{Sagorijevanje u letu}\optw{Sagorijevanje plinovitog goriva}\optw{Sagorijevanje tečnog goriva}\optw{Drugo: \crta[4cm]}}
+\q{3.2}{Primijenjena primarna mjera stepenovanog/zonskog dovoda vazduha za sagorijevanje u ložištu (primarni, sekundarni, tercijarni, OFA vazduh)?}
+ {\opt{DA}\opt{NE}}
+\q{3.3}{Zahtijevani/uobičajeni sortiman goriva/granulacija}
+ {\opt{Komad}\opt{Orah}\opt{Grah}\opt{Riža}\opt{Prah}\opt{Sječka}\opt{Piljevina}}
+\q{3.4}{Predgrijava li se vazduh za sagorijevanje?}
+ {\optw{DA \,$\rightarrow$\, nivo (npr. 150, 200, 300\,°C): \crta[1.3cm]}\optw{NE}}
+\q{3.5}{Temperatura sagorijevanja / temperatura u ložištu (°C)}
+ {Projektovana: \crta[2cm]\hfill Stvarna: \crta[2cm]}
+\q{3.6}{Radni medij kotla}
+ {\opt{Pregrijana para}\opt{Međupregrijana para}\opt{Mokra para}\opt{Vrela voda}\opt{Topla voda}\opt{Drugo: \crta[1.8cm]}}
+\q{3.7}{Pritisak pare / radnog medija (bar ili MPa)}{\polje}
+\q{3.8}{Temperatura pare / izlaznog medija (°C)}{\polje}
+\q{3.9}{Protok pare / protok vode (t/h)}{\polje}
+\q{3.10}{Temperatura napojne vode / povratnog medija (°C)}{\polje}
+\q{3.11}{Okvirni raspon promjene opterećenja (\%), npr. 70--100\,\%}{\polje}
+\q{3.12}{Stepen iskorištenja / efikasnost kotla (\%)}{\polje}
+\q{3.13}{Postojeći sistem za prečišćavanje dimnih gasova}
+ {\opt{Ciklon / multiciklon}\opt{Vrećasti filter}\opt{Elektrofilter}\opt{Mokri skruber}\optw{Odsumporavanje (FGD): mokro / polusuho / suho}\optw{Denitrifikacija (DeNO$_x$): SCR / SNCR}\optw{Adsorpcija / aktivni ugalj (živa, dioksini)}\opt{Nema sistema}\opt{Drugo: \crta[1.8cm]}}
+\end{pitanja}
+
+% ================= 4 =================
+\odjeljaknaslov{4. Podaci o trenutno korištenom gorivu}{Kotao br. \pos{K:4:s}\fcolorbox{white}{white}{\rule{0pt}{1.6ex}\hspace{1.2cm}}\pos{K:4:e}}
+\begin{pitanja}
+\q{4.1}{Vrsta goriva}{\opt{Lignit}\opt{Mrki ugalj}\opt{Kameni ugalj}\opt{Drvo}\optw{Otpadna drvna biomasa}\optw{Drugo: \crta[4cm]}}
+\q{4.2}{Porijeklo uglja}
+ {\optw{Domaći rudnik: \crta[4.2cm]}\optw{Uvozni (država): \crta[4cm]}}
+\q{4.3}{Prosječna potrošnja goriva (t/dan, t/mjesec ili t/godina)}{\polje}
+\q{4.4}{Donja toplotna moć uglja (MJ/kg ili kJ/kg)}{\polje}
+\q{4.5}{Prosječni sadržaj pepela u gorivu (\%)}{\polje}
+\q{4.6}{Sadržaj vlage u gorivu (\%)}{\polje}
+\q{4.7}{Sadržaj ukupnog i sagorivog sumpora u gorivu (\%)}{Ukupni: \crta[1.8cm]\hfill Sagorivi: \crta[1.8cm]}
+\q{4.8}{Toplotna snaga ostvarena korištenjem goriva (kW ili MW)}{\polje}
+\q{4.9}{Način skladištenja uglja}{\opt{Otvoreni depo}\opt{Natkriveni depo}\optw{Zatvoreni depo / bunker}\optw{Drugo: \crta[4cm]}}
+\end{pitanja}
+
+\clearpage
+% ================= DODATNO =================
+\odjeljaknaslov{5. Dodatne napomene}{}
+\noindent{\small Ovdje možete navesti dodatne informacije o postrojenju, problemima u radu ili planovima rekonstrukcije.}\par\vspace{4pt}
+\noindent{\setlength{\fboxsep}{0pt}\color{okvir}\pos{N:s}\framebox[\linewidth]{\rule{0pt}{4.2em}}\pos{N:e}}
+
+% ================= OVJERA =================
+\nopagebreak
+\odjeljaknaslov{Saglasnost i ovjera}{}
+{\small\noindent\setq{sag}\stepcounter{oi}\cb Saglasan/na sam da se dostavljeni podaci koriste u naučno-istraživačke svrhe i objavljuju zbirno, bez navođenja naziva privrednog subjekta.}
+
+\vspace{12pt}
+\noindent
+\begin{minipage}[b]{0.62\textwidth}\small
+\setq{ov}\begin{tabularx}{\linewidth}{@{}l X@{}}
+Datum popunjavanja: & \crta[4.6cm]\\[12pt]
+Ime i prezime: & \crta[4.6cm]\\[12pt]
+Funkcija: & \crta[4.6cm]\\[12pt]
+Potpis odgovorne osobe: & \crta[4.6cm]\\
+\end{tabularx}
+\end{minipage}\hfill
+\begin{minipage}[b]{0.30\textwidth}\centering
+{\setlength{\fboxsep}{0pt}\color{okvir}\pos{M:s}\framebox[3.6cm]{\rule{0pt}{2.6cm}}\pos{M:e}}\\[2pt]
+{\footnotesize M.P.}
+\end{minipage}
+
+\vspace{16pt}
+\begin{center}
+{\color{naslov}\itshape Hvala Vam na izdvojenom vremenu i saradnji.}
+\end{center}
+
+\end{document}

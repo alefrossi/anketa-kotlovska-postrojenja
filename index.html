@@ -10,6 +10,9 @@
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png?v=3">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
+<script src="popuni-pdf.js?v=1"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap">
 <style>
 /* Layout: papirni list A4 proporcija na sivoj podlozi, kao PDF verzija upitnika – navy trake odjeljaka, uokvirena polja, kućice */
@@ -187,7 +190,9 @@ const clean=o=>(o||"").replace(/^\*/,"");
 const Store={kind:SCRIPT_URL?"gas":"local",admin:false,
   async init(){},
   async save(r){
-    const body=JSON.stringify({firma:flatFirma(r),kotlovi:flatKotlovi(r),hp:(document.getElementById("website")||{}).value||""});
+    let pdf="";
+    try{ r._pdf=await napraviPdf(r); pdf=uBase64(r._pdf); }catch(e){ console.warn("PDF potvrda nije napravljena:",e); }
+    const body=JSON.stringify({firma:flatFirma(r),kotlovi:flatKotlovi(r),pdf,hp:(document.getElementById("website")||{}).value||""});
     if(!SCRIPT_URL){const a=ls.get("upitnici_demo")||[];a.push(r);ls.set("upitnici_demo",a);return}
     try{
       const res=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});
@@ -203,6 +208,28 @@ const Store={kind:SCRIPT_URL?"gas":"local",admin:false,
   },
   watch(cb){cb([]);return()=>{}}, async remove(){}
 };
+/* PDF potvrda: originalni PDF upitnika (predlozak.pdf) popunjen odgovorima */
+let pdfResursi=null;
+function ucitajPdfResurse(){
+  if(!pdfResursi){
+    const b=u=>fetch(u).then(x=>{if(!x.ok)throw new Error(u);return x.arrayBuffer()});
+    pdfResursi=Promise.all([b("predlozak.pdf?v=1"),b("fonts/lmroman10-regular.ttf"),fetch("pozicije.json?v=1").then(x=>x.json())]);
+    pdfResursi.catch(()=>{pdfResursi=null});
+  }
+  return pdfResursi;
+}
+async function napraviPdf(r){
+  if(!window.PDFLib||!window.fontkit||!window.popuniPdf) throw new Error("PDF biblioteke nisu učitane");
+  const [predlozak,font,pozicije]=await ucitajPdfResurse();
+  return popuniPdf({PDFLib,fontkit,predlozak,font,pozicije,pitanja:{S1,S2,S3,S4},zapis:r,rok:ROK,kontakt:KONTAKT});
+}
+function uBase64(bytes){let s="";for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(s)}
+function nazivPdf(r){
+  const d=new Date(r.poslano),z=n=>String(n).padStart(2,"0");
+  const f=String(r.firma["1.1"]||"firma").normalize("NFC").replace(/[^\wčćžšđČĆŽŠĐ-]+/g,"_").replace(/_+/g,"_").replace(/^_|_$/g,"").slice(0,60);
+  return `Upitnik_${f}_${z(d.getDate())}-${z(d.getMonth()+1)}-${d.getFullYear()}_${r.id}.pdf`;
+}
+
 /* ravni redovi za Google Sheet: kolona = "broj pitanja + tekst" */
 const fmtV0=v=>v==null?"":Array.isArray(v)?v.filter(Boolean).join(" / "):typeof v==="object"?Object.entries(v).map(([k,x])=>x===true?k:k+" "+x).join("; "):String(v);
 function flatFirma(r){return {"Šifra":r.id,"Vrijeme slanja":r.poslano,...Object.fromEntries(S1.map(f=>[f.k+" "+f.q,fmtV0(r.firma[f.k])])),
@@ -387,6 +414,7 @@ async function izvoz(){
 
 /* ---------- pokretanje ---------- */
 function route(){ renderForm(); }
+setTimeout(()=>ucitajPdfResurse().catch(()=>{}),1500);
 window.addEventListener("hashchange",route);
 route();
 Store.init().then(route);
