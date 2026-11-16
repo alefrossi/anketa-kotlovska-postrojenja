@@ -229,11 +229,7 @@ async function napraviPdf(r){
   return popuniPdf({PDFLib,fontkit,predlozak,font,pozicije,pitanja:{S1,S2,S3,S4},zapis:r,rok:ROK,kontakt:KONTAKT});
 }
 function uBase64(bytes){let s="";for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(s)}
-function nazivPdf(r){
-  const d=new Date(r.poslano),z=n=>String(n).padStart(2,"0");
-  const f=String(r.firma["1.1"]||"firma").normalize("NFC").replace(/[^\wčćžšđČĆŽŠĐ-]+/g,"_").replace(/_+/g,"_").replace(/^_|_$/g,"").slice(0,60);
-  return `Upitnik_${f}_${z(d.getDate())}-${z(d.getMonth()+1)}-${d.getFullYear()}_${r.id}.pdf`;
-}
+function nazivPdf(r){ return `${r.id}.pdf`; }
 
 /* ravni redovi za Google Sheet: kolona = "broj pitanja + tekst" */
 const fmtV0=v=>v==null?"":Array.isArray(v)?v.filter(Boolean).join(" / "):typeof v==="object"?Object.entries(v).map(([k,x])=>x===true?k:k+" "+x).join("; "):String(v);

@@ -6,7 +6,7 @@
  * Zaglavlja kolona se kreiraju automatski iz pristiglih upitnika.
  */
 const SHEET_ID = '1jFLcj7ErQh0pYMuyHFpG0tQxZqIbstX_Yv0W9f9NGAM'; // tabela "Upitnik kotlovska postrojenja – odgovori"
-const VERZIJA = '2026-11-16 PDF-original';  // vidljivo u tabeli – potvrđuje da radi nova skripta
+const VERZIJA = '2026-11-16 PDF-original, naziv = šifra';  // vidljivo u tabeli – potvrđuje da radi nova skripta
 const SHEET_FIRME = 'Privredni subjekti';
 const SHEET_KOTLOVI = 'Kotlovi';
 const PDF_FOLDER_NAZIV = 'Upitnik kotlovska postrojenja – PDF potvrde';
@@ -165,16 +165,12 @@ function napraviPdf_(d) {
     '<div class="foot">' + esc_(firma) + ' · upitnik zaprimljen ' + datum + ' u ' + vrijeme + ' h · šifra ' + esc_(sifra) + '</div>' +
     '</body></html>';
 
-  const cistiNaziv = String(firma).replace(/[^\wčćžšđČĆŽŠĐ-]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').slice(0, 60) || 'firma';
-  const naziv = 'Upitnik_' + cistiNaziv + '_' + datum.replace(/\.$/, '').replace(/\./g, '-') + '_' + sifra + '.pdf';
+  const naziv = nazivPdf_(f);
   return Utilities.newBlob(html, 'text/html', naziv.replace('.pdf', '.html')).getAs('application/pdf').setName(naziv);
 }
 
 function nazivPdf_(f) {
-  const t = new Date(f['Vrijeme slanja'] || new Date());
-  const datum = Utilities.formatDate(t, 'Europe/Sarajevo', 'dd-MM-yyyy');
-  const firma = String(f['1.1 Naziv privrednog subjekta'] || 'firma').replace(/[^\wčćžšđČĆŽŠĐ-]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').slice(0, 60);
-  return 'Upitnik_' + firma + '_' + datum + '_' + f['Šifra'] + '.pdf';
+  return f['Šifra'] + '.pdf';   // PDF se sprema isključivo pod šifrom upitnika
 }
 
 function posaljiEmail_(adresa, d, pdf) {
