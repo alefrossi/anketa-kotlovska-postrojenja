@@ -13,6 +13,11 @@ const PDF_FOLDER_NAZIV = 'Upitnik kotlovska postrojenja – PDF potvrde';
 const POSILJALAC = 'Anketa – Mašinski fakultet Sarajevo';  // ime pošiljaoca u e-mailu
 const KOPIJA_NA = '';  // npr. vlastita adresa ako želiš kopiju svakog e-maila (BCC); prazno = bez kopije
 
+/** Otvaranjem URL-a skripte u pregledniku vidi se koja verzija trenutno radi. */
+function doGet() {
+  return ContentService.createTextOutput('Skripta za anketni upitnik radi. Verzija: ' + VERZIJA);
+}
+
 function doPost(e) {
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);                       // dva istovremena slanja ne pišu u isti red
