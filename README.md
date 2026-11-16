@@ -15,3 +15,12 @@ Stranica je statična (GitHub Pages); odgovori se šalju u privatni Google Sheet
 
 Ko vidi odgovore: samo vlasnik Google tabele. „Anyone“ u koraku 3 znači da svako može *poslati* odgovor, ne i čitati tabelu.
 Nakon izmjene `Code.gs` potrebno je *Deploy → Manage deployments → Edit → New version*.
+
+## PDF potvrda i e-mail
+Nakon svakog poslanog upitnika skripta:
+- pravi PDF potvrdu (naziv firme, datum unosa, šifra i svi odgovori),
+- sprema je u Drive folder „Upitnik kotlovska postrojenja – PDF potvrde“,
+- šalje je kao prilog na e-mail adresu iz pitanja 1.4.
+
+Nakon zamjene `Code.gs`: u editoru izabrati funkciju `autorizacija` → **Run** → odobriti pristup Drive-u i Gmailu,
+zatim *Deploy → Manage deployments → Edit (olovka) → Version: New version → Deploy* (URL ostaje isti).

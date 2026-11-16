@@ -126,7 +126,7 @@ const S1 = [
   {k:"1.1",q:"Naziv privrednog subjekta",req:1},
   {k:"1.2",q:"Adresa privrednog subjekta"},
   {k:"1.3",q:"Kontakt osoba (ime, prezime i funkcija)",req:1},
-  {k:"1.4",q:"Telefon i e-mail adresa",req:1},
+  {k:"1.4",q:"Telefon i e-mail adresa",req:1,email:1},
   {k:"1.5",q:"Osnovna djelatnost / proizvod"}
 ];
 const S2 = [
@@ -186,6 +186,7 @@ const Store={kind:SCRIPT_URL?"gas":"local",admin:false,
       const res=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});
       const j=await res.json().catch(()=>({ok:true}));
       if(j.ok===false) throw new Error(j.error||"server");
+      r.potvrda=j.email||"";
     }catch(e){
       if(e instanceof TypeError){ // CORS/mreža: pošalji bez čitanja odgovora
         await fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body}); return;
@@ -255,6 +256,7 @@ function renderForm(){
   if(sent){
     S.append(h("div",{class:"done"},h("h2",{},"Upitnik je uspješno poslan."),
       h("p",{},"Podaci su spremljeni pod šifrom ",h("b",{},sent.id),". Hvala Vam na izdvojenom vremenu i saradnji."),
+      h("p",{},sent.potvrda?["PDF potvrda o popunjenom upitniku poslana je na ",h("b",{},sent.potvrda),". Ako ne stigne u narednih nekoliko minuta, provjerite i folder za neželjenu poštu (spam)."]:"PDF potvrda o popunjenom upitniku bit će poslana na e-mail adresu navedenu u upitniku. Ako ne stigne u narednih nekoliko minuta, provjerite folder za neželjenu poštu (spam)."),
       h("p",{},h("button",{onclick:()=>{sent=null;renderForm()}},"Popuni novi upitnik"))));
     S.append(foot()); return;
   }
@@ -262,7 +264,7 @@ function renderForm(){
   const meta=[]; if(ROK)meta.push(h("span",{},"Rok za dostavu: ",h("b",{},ROK))); if(KONTAKT)meta.push(h("span",{},"Kontakt istraživača: ",h("b",{},KONTAKT)));
   S.append(h("section",{class:"letter","aria-label":"Uvod"},h("p",{},h("b",{},"Poštovani,")),
     h("p",{},"molimo Vas da popunite ovaj upitnik radi prikupljanja tehničkih i pogonskih podataka o kotlovskim postrojenjima. Podaci će se koristiti isključivo u okviru naučno-istraživačkog rada i analize pogonske efikasnosti postrojenja, a u rezultatima će biti prikazani zbirno, bez navođenja naziva privrednog subjekta."),
-    h("p",{},"Popunjavanje upitnika traje približno 15 minuta. Unaprijed se zahvaljujemo na saradnji."),meta.length?h("div",{class:"meta"},meta):null));
+    h("p",{},"Popunjavanje upitnika traje približno 15 minuta. Nakon slanja, na e-mail adresu navedenu u pitanju 1.4 automatski stiže PDF potvrda sa svim dostavljenim podacima. Unaprijed se zahvaljujemo na saradnji."),meta.length?h("div",{class:"meta"},meta):null));
   S.append(h("section",{class:"guide"},h("b",{class:"t"},"Uputstvo za popunjavanje"),h("ul",{},
     h("li",{},"Odgovore upisujte u uokvirena polja; unos se automatski čuva u ovom pregledniku dok ne pošaljete upitnik."),
     h("li",{},"Kod ponuđenih odgovora označite odgovarajuću kućicu; moguće je označiti više odgovora gdje to odgovara stvarnom stanju."),
@@ -310,7 +312,10 @@ function provjeri(){
   let first=null;
   document.querySelectorAll(".row .msg,#sagl-msg").forEach(e=>e.remove());
   document.querySelectorAll(".bad").forEach(e=>e.classList.remove("bad"));
-  S1.filter(f=>f.req).forEach(f=>{ if(!(st.firma[f.k]||"").trim()){const r=document.querySelector(`.row[data-k="${f.k}"]`);r.classList.add("bad");r.querySelector(".a").append(h("div",{class:"msg"},"Ovo polje je obavezno."));first=first||r} });
+  S1.filter(f=>f.req).forEach(f=>{ const v=(st.firma[f.k]||"").trim(); let m=null;
+    if(!v) m="Ovo polje je obavezno.";
+    else if(f.email && !/[^\s@]+@[^\s@]+\.[a-z]{2,}/i.test(v)) m="Upišite i e-mail adresu – na nju stiže PDF potvrda o popunjenom upitniku.";
+    if(m){const r=document.querySelector(`.row[data-k="${f.k}"]`);r.classList.add("bad");r.querySelector(".a").append(h("div",{class:"msg"},m));first=first||r} });
   if(!(st.ovjera.ime||"").trim()){const i=$("#ov-ime");i.parentElement.classList.add("bad");i.parentElement.append(h("div",{class:"msg"},"Upišite ime i prezime."));first=first||i}
   if(!st.saglasnost){const c=$(".consent");c.after(h("div",{class:"msg",id:"sagl-msg"},"Za slanje je potrebna saglasnost."));first=first||c}
   if(first){first.scrollIntoView({behavior:"smooth",block:"center"});return false}
