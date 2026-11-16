@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="bs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Anketni upitnik – kotlovska postrojenja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap">
+<style>
+/* Layout: papirni list A4 proporcija na sivoj podlozi, kao PDF verzija upitnika – navy trake odjeljaka, uokvirena polja, kućice */
+:root{
+  --desk:#E9EBEF; --paper:#FFFFFF; --ink:#16161D; --muted:#5B5F6B;
+  --navy:#00007F; --navy-2:#1C1C99; --letter-bg:#F4F4FC; --letter-frame:#00008C;
+  --guide-bg:#F5F5F6; --guide-head:#E3E3E6; --guide-frame:#7F7F86;
+  --field:#9A9DA6; --field-focus:#00007F; --ok:#1E6B3A; --err:#A61B1B; --warn-bg:#FFF4E5; --warn-frame:#B35900;
+  --serif:"Source Serif 4","Latin Modern Roman","Cambria",Georgia,serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--desk);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.45}
+.desk{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+.sheet{max-width:820px;margin:0 auto;background:var(--paper);box-shadow:0 1px 3px rgba(0,0,0,.12),0 8px 28px rgba(0,0,0,.06);padding:34px 48px 40px}
+.runhead{display:flex;justify-content:space-between;gap:12px;font-size:13px;border-bottom:.5px solid var(--ink);padding-bottom:5px;margin-bottom:22px;flex-wrap:wrap}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.inst{font-variant:small-caps;letter-spacing:.03em;font-size:14px;line-height:1.35}
+.code{text-align:right;font-size:12.5px}
+.code i{display:block;color:var(--muted)}
+.code .box{margin-top:4px;border:1px solid var(--navy);min-width:150px;height:30px;display:grid;place-items:center;font-variant-numeric:tabular-nums;color:var(--navy);font-weight:600}
+h1{font-size:30px;font-weight:700;color:var(--navy);text-align:center;margin:26px 0 4px;letter-spacing:.01em}
+.sub{text-align:center;color:var(--navy-2);font-size:17px;margin:0 0 20px;text-wrap:balance}
+.letter{background:var(--letter-bg);border:1px solid var(--letter-frame);border-radius:5px;padding:12px 16px;margin-bottom:14px}
+.letter p{margin:4px 0}
+.letter .meta{display:flex;gap:28px;flex-wrap:wrap;margin-top:10px;font-size:14px}
+.guide{background:var(--guide-bg);border:1px solid var(--guide-frame);margin-bottom:8px}
+.guide b.t{display:block;background:var(--guide-head);padding:4px 12px;font-size:14px}
+.guide ul{margin:6px 0 8px;padding-left:30px;font-size:14px}
+.guide li{margin:3px 0}
+.band{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--navy);color:#fff;font-weight:700;padding:5px 10px;margin:26px 0 6px;flex-wrap:wrap}
+.band .kb{font-weight:400;font-size:14px;display:flex;align-items:center;gap:6px}
+.band .kb span{background:#fff;color:var(--navy);min-width:52px;text-align:center;padding:0 6px;font-weight:700}
+.thead,.row{display:grid;grid-template-columns:44px minmax(0,1fr) minmax(0,1.25fr);gap:12px;align-items:start}
+.thead{font-weight:700;font-size:14px;border-bottom:1.2px solid var(--navy);padding:4px 0 5px}
+.row{padding:9px 0;font-size:14.5px}
+.row .n{color:var(--navy);font-weight:700}
+.row .q{padding-top:3px}
+.row .q .req{color:var(--err)}
+input[type=text],input[type=date],textarea{width:100%;font:inherit;font-size:14.5px;color:var(--ink);background:#fff;border:1px solid var(--field);border-radius:2px;padding:6px 8px;min-height:34px}
+textarea{min-height:92px;resize:vertical}
+input[type=text]:focus,input[type=date]:focus,textarea:focus{outline:none;border-color:var(--field-focus);box-shadow:0 0 0 2px rgba(0,0,127,.15)}
+.bad input[type=text],.bad input[type=date]{border-color:var(--err)}
+.msg{color:var(--err);font-size:13px;margin-top:3px}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px 14px;padding-top:2px}
+.opts.one{grid-template-columns:minmax(0,1fr)}
+.opt{display:flex;align-items:center;gap:7px;cursor:pointer;min-height:26px}
+.opt.w{grid-column:1/-1}
+.opt input{appearance:none;-webkit-appearance:none;width:15px;height:15px;border:1.1px solid var(--ink);border-radius:0;margin:0;flex:none;display:grid;place-items:center;background:#fff;cursor:pointer}
+.opt input:checked::after{content:"";width:9px;height:9px;background:
+  linear-gradient(45deg,transparent 43%,var(--navy) 43% 57%,transparent 57%),linear-gradient(-45deg,transparent 43%,var(--navy) 43% 57%,transparent 57%)}
+.opt input:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.inline{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.inline input[type=text]{min-height:28px;padding:3px 6px;width:auto;flex:1;min-width:110px}
+.opt.w>input[type=text]{flex:1;width:auto;min-width:0;min-height:28px;padding:3px 6px}
+.opt .inline{flex:none}
+.pair{display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr);gap:6px 10px;align-items:center}
+.boiler-tools{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;padding:10px 12px;border:1px dashed var(--field);flex-wrap:wrap;font-size:14px}
+.boiler-sep{margin-top:30px;border-top:2px solid var(--navy);padding-top:2px}
+button{font:inherit;font-size:14.5px;cursor:pointer;border:1px solid var(--navy);background:#fff;color:var(--navy);padding:7px 14px;border-radius:2px}
+button.primary{background:var(--navy);color:#fff;font-weight:600}
+button.link{border:0;padding:4px 6px;text-decoration:underline}
+button:disabled{opacity:.55;cursor:default}
+button:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.consent{display:flex;gap:8px;align-items:flex-start;font-size:14.5px;margin:8px 0 14px}
+.consent input{margin-top:3px}
+.sign{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:24px;align-items:end}
+.sign .lines{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 12px;align-items:center;font-size:14.5px}
+.mp{height:130px;border:1px solid var(--field);display:flex;align-items:flex-end;justify-content:center;font-size:12px;color:var(--muted);padding-bottom:6px;text-align:center}
+.thanks-line{text-align:center;color:var(--navy);font-style:italic;margin:26px 0 6px}
+.submit{display:flex;justify-content:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+.foot{display:flex;justify-content:space-between;gap:12px;border-top:.5px solid var(--ink);margin-top:34px;padding-top:5px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.note{background:var(--warn-bg);border:1px solid var(--warn-frame);border-radius:4px;padding:8px 12px;font-size:14px;margin-top:12px}
+.done{text-align:center;padding:40px 10px}
+.done h2{color:var(--navy);font-size:24px;margin:0 0 8px}
+.mode{font-size:12px;color:var(--muted)}
+/* pregled odgovora */
+.admin h2{color:var(--navy);margin:0 0 4px;font-size:22px}
+.admin .bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.tbl{overflow-x:auto;border:1px solid var(--field)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:7px 10px;border-bottom:1px solid #E1E2E6;text-align:left;white-space:nowrap}
+th{background:var(--navy);color:#fff;font-weight:600}
+tbody tr{cursor:pointer} tbody tr:hover{background:var(--letter-bg)}
+.det{margin-top:14px;border:1px solid var(--navy);padding:12px 16px;font-size:14px}
+.det dl{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:4px 14px;margin:4px 0 12px}
+.det dt{color:var(--muted)} .det dd{margin:0;overflow-wrap:anywhere}
+.det h3{color:var(--navy);font-size:15px;margin:12px 0 2px;border-bottom:1px solid #E1E2E6}
+.confirm{display:inline-flex;gap:8px;align-items:center;background:#FBECEC;padding:6px 10px;margin-left:8px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:#fff;padding:9px 16px;border-radius:4px;z-index:9}
+@media (max-width:640px){
+  .sheet{padding:22px 16px 28px}
+  .thead{display:none}
+  .row{grid-template-columns:36px minmax(0,1fr)}
+  .row .a{grid-column:1/-1}
+  .opts{grid-template-columns:minmax(0,1fr)}
+  .sign{grid-template-columns:minmax(0,1fr)}
+  .pair{grid-template-columns:auto minmax(0,1fr)}
+  h1{font-size:25px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="desk"><main class="sheet" id="sheet"></main></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ---------- podesivo prije slanja firmama ---------- */
+const ROK = "";       // npr. "15. 12. 2026."
+const KONTAKT = "";   // npr. e-mail istraživača
+/* URL Google Apps Script web aplikacije (korak 3 u README.md) */
+const SCRIPT_URL = "";
+
+/* ---------- pitanja (identična PDF verziji upitnika) ---------- */
+const O = s => s.split("|");
+const S1 = [
+  {k:"1.1",q:"Naziv privrednog subjekta",req:1},
+  {k:"1.2",q:"Adresa privrednog subjekta"},
+  {k:"1.3",q:"Kontakt osoba (ime, prezime i funkcija)",req:1},
+  {k:"1.4",q:"Telefon i e-mail adresa",req:1},
+  {k:"1.5",q:"Osnovna djelatnost / proizvod"}
+];
+const S2 = [
+  {k:"2.1",q:"Ukupan broj kotlova u postrojenju",plant:1},
+  {k:"2.2",q:"Proizvođač i model kotla (ako je poznato)"},
+  {k:"2.3",q:"Godina proizvodnje / puštanja u rad"},
+  {k:"2.4",q:"Vrsta kotla i namjena (toplovodni, parni, tehnološki i sl.)"},
+  {k:"2.5",q:"Nazivni kapacitet kotla (kW ili MW; kg/s ili t/h)"},
+  {k:"2.6",q:"Stvarni / radni kapacitet kotla (kW ili MW; kg/s ili t/h)"},
+  {k:"2.7",q:"Prosječan broj radnih sati godišnje (h/god)"},
+  {k:"2.8",q:"Režim rada postrojenja",t:"multi",o:O("Kontinuirani|Sezonski|Povremeni|Drugo:")},
+  {k:"2.9",q:"Broj kotlova koji istovremeno rade u punom kapacitetu",plant:1}
+];
+const S3 = [
+  {k:"3.1",q:"Tehnologija sagorijevanja uglja/goriva",t:"multi",one:1,o:O("Sagorijevanje na pokretnoj rešetki|Sagorijevanje u fluidiziranom sloju|Sagorijevanje u letu|Sagorijevanje plinovitog goriva|Sagorijevanje tečnog goriva|Drugo:")},
+  {k:"3.2",q:"Primijenjena primarna mjera stepenovanog/zonskog dovoda vazduha za sagorijevanje u ložištu (primarni, sekundarni, tercijarni, OFA vazduh)?",t:"radio",o:O("DA|NE")},
+  {k:"3.3",q:"Zahtijevani/uobičajeni sortiman goriva/granulacija",t:"multi",o:O("Komad|Orah|Grah|Riža|Prah|Sječka|Piljevina")},
+  {k:"3.4",q:"Predgrijava li se vazduh za sagorijevanje?",t:"radio",one:1,o:["DA → nivo (npr. 150, 200, 300 °C):","NE"]},
+  {k:"3.5",q:"Temperatura sagorijevanja / temperatura u ložištu (°C)",t:"pair",l:["Projektovana:","Stvarna:"]},
+  {k:"3.6",q:"Radni medij kotla",t:"multi",o:O("Pregrijana para|Međupregrijana para|Mokra para|Vrela voda|Topla voda|Drugo:")},
+  {k:"3.7",q:"Pritisak pare / radnog medija (bar ili MPa)"},
+  {k:"3.8",q:"Temperatura pare / izlaznog medija (°C)"},
+  {k:"3.9",q:"Protok pare / protok vode (t/h)"},
+  {k:"3.10",q:"Temperatura napojne vode / povratnog medija (°C)"},
+  {k:"3.11",q:"Okvirni raspon promjene opterećenja (%), npr. 70–100 %"},
+  {k:"3.12",q:"Stepen iskorištenja / efikasnost kotla (%)"},
+  {k:"3.13",q:"Postojeći sistem za prečišćavanje dimnih gasova",t:"multi",o:["Ciklon / multiciklon","Vrećasti filter","Elektrofilter","Mokri skruber","*Odsumporavanje (FGD): mokro / polusuho / suho","*Denitrifikacija (DeNOₓ): SCR / SNCR","*Adsorpcija / aktivni ugalj (živa, dioksini)","Nema sistema","Drugo:"]}
+];
+const S4 = [
+  {k:"4.1",q:"Vrsta goriva",t:"multi",o:["Lignit","Mrki ugalj","Kameni ugalj","Drvo","*Otpadna drvna biomasa","*Drugo:"]},
+  {k:"4.2",q:"Porijeklo uglja",t:"multi",one:1,o:O("Domaći rudnik:|Uvozni (država):")},
+  {k:"4.3",q:"Prosječna potrošnja goriva (t/dan, t/mjesec ili t/godina)"},
+  {k:"4.4",q:"Donja toplotna moć uglja (MJ/kg ili kJ/kg)"},
+  {k:"4.5",q:"Prosječni sadržaj pepela u gorivu (%)"},
+  {k:"4.6",q:"Sadržaj vlage u gorivu (%)"},
+  {k:"4.7",q:"Sadržaj ukupnog i sagorivog sumpora u gorivu (%)",t:"pair",l:["Ukupni:","Sagorivi:"]},
+  {k:"4.8",q:"Toplotna snaga ostvarena korištenjem goriva (kW ili MW)"},
+  {k:"4.9",q:"Način skladištenja uglja",t:"multi",o:["Otvoreni depo","Natkriveni depo","*Zatvoreni depo / bunker","*Drugo:"]}
+];
+const KOTAO = [["2. Podaci o kotlovskom postrojenju",S2],["3. Tehnologija sagorijevanja i radni parametri",S3],["4. Podaci o trenutno korištenom gorivu",S4]];
+
+/* ---------- pomoćne ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const h=(t,a={},...k)=>{const e=document.createElement(t);for(const[x,v]of Object.entries(a)){if(v==null||v===false)continue;if(x==="class")e.className=v;else if(x.startsWith("on"))e.addEventListener(x.slice(2),v);else e.setAttribute(x,v===true?"":v)}for(const c of k.flat())if(c!=null)e.append(c.nodeType?c:document.createTextNode(c));return e};
+const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch{return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}},del(k){try{localStorage.removeItem(k)}catch{}}};
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3500)}
+const sifra=()=>"KP-"+new Date().getFullYear()+"-"+Math.random().toString(36).slice(2,7).toUpperCase();
+const clean=o=>(o||"").replace(/^\*/,"");
+
+/* ---------- spremanje ---------- */
+const Store={kind:SCRIPT_URL?"gas":"local",admin:false,
+  async init(){},
+  async save(r){
+    const body=JSON.stringify({firma:flatFirma(r),kotlovi:flatKotlovi(r),hp:(document.getElementById("website")||{}).value||""});
+    if(!SCRIPT_URL){const a=ls.get("upitnici_demo")||[];a.push(r);ls.set("upitnici_demo",a);return}
+    try{
+      const res=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});
+      const j=await res.json().catch(()=>({ok:true}));
+      if(j.ok===false) throw new Error(j.error||"server");
+    }catch(e){
+      if(e instanceof TypeError){ // CORS/mreža: pošalji bez čitanja odgovora
+        await fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body}); return;
+      }
+      throw e;
+    }
+  },
+  watch(cb){cb([]);return()=>{}}, async remove(){}
+};
+/* ravni redovi za Google Sheet: kolona = "broj pitanja + tekst" */
+const fmtV0=v=>v==null?"":Array.isArray(v)?v.filter(Boolean).join(" / "):typeof v==="object"?Object.entries(v).map(([k,x])=>x===true?k:k+" "+x).join("; "):String(v);
+function flatFirma(r){return {"Šifra":r.id,"Vrijeme slanja":r.poslano,...Object.fromEntries(S1.map(f=>[f.k+" "+f.q,fmtV0(r.firma[f.k])])),
+  "Broj upisanih kotlova":r.kotlovi.length,"5. Dodatne napomene":r.napomene,"Popunio/la":r.ovjera.ime||"","Funkcija":r.ovjera.funkcija||"","Datum popunjavanja":r.ovjera.datum||"","Saglasnost":"DA"}}
+function flatKotlovi(r){return r.kotlovi.map((k,i)=>({"Šifra":r.id,"Privredni subjekt":r.firma["1.1"]||"","Kotao br.":i+1,
+  ...Object.fromEntries([...S2,...S3,...S4].filter(f=>!(f.plant&&i>0)).map(f=>[f.k+" "+f.q,fmtV0(k[f.k])]))}))}
+
+/* ---------- stanje forme (nacrt se čuva u pregledniku) ---------- */
+const DK="upitnik_kotlovi_nacrt";
+let st = ls.get(DK) || {firma:{}, kotlovi:[{}], napomene:"", saglasnost:false, ovjera:{}};
+const save=()=>ls.set(DK,st);
+
+/* polje za jedno pitanje */
+function answer(f,data,id){
+  const t=f.t||"text";
+  if(t==="text"){const i=h("input",{type:"text",id,"aria-labelledby":id+"-q"});i.value=data[f.k]||"";i.addEventListener("input",()=>{data[f.k]=i.value;save();i.closest(".row").classList.remove("bad");i.closest(".row").querySelector(".msg")?.remove()});return i}
+  if(t==="pair"){const v=data[f.k]||["",""];const mk=(n)=>{const i=h("input",{type:"text",id:id+"-"+n,"aria-label":f.l[n]});i.value=v[n]||"";i.addEventListener("input",()=>{v[n]=i.value;data[f.k]=v;save()});return i};return h("div",{class:"pair"},h("label",{for:id+"-0"},f.l[0]),mk(0),h("label",{for:id+"-1"},f.l[1]),mk(1))}
+  // radio / multi – vrijednost: {opcija:true|"tekst"}
+  const v=data[f.k]||{}; const box=h("div",{class:"opts"+(f.one?" one":""),role:t==="radio"?"radiogroup":"group","aria-labelledby":id+"-q"});
+  f.o.forEach((raw,i)=>{
+    const o=clean(raw), wide=raw.startsWith("*")||o.endsWith(":");
+    const inp=h("input",{type:t==="radio"?"radio":"checkbox",name:id,id:id+"-"+i});
+    inp.checked=o in v;
+    let txt=null;
+    if(o.endsWith(":")){txt=h("input",{type:"text","aria-label":o.replace(":","")});txt.value=typeof v[o]==="string"?v[o]:"";
+      txt.addEventListener("input",()=>{if(txt.value&&!inp.checked){inp.checked=true;inp.dispatchEvent(new Event("change"))}if(inp.checked){v[o]=txt.value;data[f.k]=v;save()}})}
+    inp.addEventListener("change",()=>{
+      if(t==="radio"){for(const k in v)delete v[k];}
+      if(inp.checked)v[o]=txt?txt.value:true;else delete v[o];
+      data[f.k]=v;save();
+    });
+    const lab=h("label",{class:"opt"+(wide||f.one?" w":""),for:id+"-"+i},inp,o);
+    box.append(txt?h("div",{class:"opt w"},h("label",{class:"inline",for:id+"-"+i},inp,o),txt):lab);
+  });
+  return box;
+}
+function rows(fields,data,pfx,kIdx){
+  const wrap=h("div");
+  wrap.append(h("div",{class:"thead","aria-hidden":"true"},h("div",{},"R.br."),h("div",{},"Traženi podatak / pitanje"),h("div",{},"Odgovor")));
+  fields.forEach(f=>{
+    if(f.plant&&kIdx>0)return;
+    const id=pfx+f.k.replace(".","_");
+    wrap.append(h("div",{class:"row","data-k":f.k},h("div",{class:"n"},f.k),h("div",{class:"q",id:id+"-q"},f.q,f.req?h("span",{class:"req","aria-label":"obavezno"}," *"):null),h("div",{class:"a"},answer(f,data,id))));
+  });
+  return wrap;
+}
+
+/* ---------- prikaz forme ---------- */
+let sent=null;
+function renderForm(){
+  const S=$("#sheet"); S.replaceChildren();
+  S.append(h("div",{class:"runhead"},h("span",{},"Anketni upitnik – kotlovska postrojenja"),h("span",{},"Mašinski fakultet, Univerzitet u Sarajevu")));
+  S.append(h("div",{class:"top"},
+    h("div",{class:"inst"},"Univerzitet u Sarajevu",h("br"),"Mašinski fakultet",h("br"),"Katedra za energetiku i KGH tehniku"),
+    h("div",{class:"code"},"Šifra upitnika",h("i",{},"(dodjeljuje se pri slanju)"),h("div",{class:"box"},sent?sent.id:""))));
+  S.append(h("h1",{},"ANKETNI UPITNIK"),h("p",{class:"sub"},"Prikupljanje tehničkih i pogonskih podataka o kotlovskim postrojenjima"));
+
+  if(sent){
+    S.append(h("div",{class:"done"},h("h2",{},"Upitnik je uspješno poslan."),
+      h("p",{},"Podaci su spremljeni pod šifrom ",h("b",{},sent.id),". Hvala Vam na izdvojenom vremenu i saradnji."),
+      h("p",{},h("button",{onclick:()=>{sent=null;renderForm()}},"Popuni novi upitnik"))));
+    S.append(foot()); return;
+  }
+
+  const meta=[]; if(ROK)meta.push(h("span",{},"Rok za dostavu: ",h("b",{},ROK))); if(KONTAKT)meta.push(h("span",{},"Kontakt istraživača: ",h("b",{},KONTAKT)));
+  S.append(h("section",{class:"letter","aria-label":"Uvod"},h("p",{},h("b",{},"Poštovani,")),
+    h("p",{},"molimo Vas da popunite ovaj upitnik radi prikupljanja tehničkih i pogonskih podataka o kotlovskim postrojenjima. Podaci će se koristiti isključivo u okviru naučno-istraživačkog rada i analize pogonske efikasnosti postrojenja, a u rezultatima će biti prikazani zbirno, bez navođenja naziva privrednog subjekta."),
+    h("p",{},"Popunjavanje upitnika traje približno 15 minuta. Unaprijed se zahvaljujemo na saradnji."),meta.length?h("div",{class:"meta"},meta):null));
+  S.append(h("section",{class:"guide"},h("b",{class:"t"},"Uputstvo za popunjavanje"),h("ul",{},
+    h("li",{},"Odgovore upisujte u uokvirena polja; unos se automatski čuva u ovom pregledniku dok ne pošaljete upitnik."),
+    h("li",{},"Kod ponuđenih odgovora označite odgovarajuću kućicu; moguće je označiti više odgovora gdje to odgovara stvarnom stanju."),
+    h("li",{},"Vrijednosti upisujte u jedinicama navedenim uz pitanje; decimalni separator je zarez."),
+    h("li",{},"Ako postrojenje ima ",h("b",{},"više kotlova"),", odjeljke 2–4 popunite zasebno za svaki kotao (dugme „Dodaj kotao“ na kraju odjeljka 4)."),
+    h("li",{},"Ako podatak nije poznat ili nije primjenjiv, upišite „nije poznato“ ili „nije primjenjivo“. Polja označena sa ",h("span",{style:"color:var(--err)"},"*")," su obavezna."))));
+
+  S.append(h("div",{class:"band"},h("span",{},"1. Opći podaci o privrednom subjektu")),rows(S1,st.firma,"f",0));
+
+  st.kotlovi.forEach((k,i)=>{
+    const box=h("div",{class:i?"boiler-sep":null,"data-kotao":i});
+    KOTAO.forEach(([t,fs])=>{
+      box.append(h("div",{class:"band"},h("span",{},t),h("span",{class:"kb"},"Kotao br.",h("span",{},String(i+1)))),rows(fs,k,"k"+i+"_",i));
+    });
+    if(i>0)box.append(h("div",{style:"text-align:right"},h("button",{class:"link",type:"button",onclick:()=>{st.kotlovi.splice(i,1);save();renderForm()}},`Ukloni kotao br. ${i+1}`)));
+    S.append(box);
+  });
+  S.append(h("div",{class:"boiler-tools"},h("span",{},`Upisano kotlova: ${st.kotlovi.length}. Ima li postrojenje još kotlova?`),
+    h("button",{type:"button",onclick:()=>{st.kotlovi.push({});save();renderForm();setTimeout(()=>document.querySelector(`[data-kotao="${st.kotlovi.length-1}"]`)?.scrollIntoView({behavior:"smooth"}),50)}},"+ Dodaj kotao")));
+
+  const nap=h("textarea",{id:"napomene","aria-label":"Dodatne napomene"});nap.value=st.napomene||"";nap.addEventListener("input",()=>{st.napomene=nap.value;save()});
+  S.append(h("div",{class:"band"},h("span",{},"5. Dodatne napomene")),h("p",{style:"font-size:14px;margin:4px 0 6px"},"Ovdje možete navesti dodatne informacije o postrojenju, problemima u radu ili planovima rekonstrukcije."),nap);
+
+  const sg=h("input",{type:"checkbox",id:"sagl"});sg.checked=!!st.saglasnost;sg.addEventListener("change",()=>{st.saglasnost=sg.checked;save();$("#sagl-msg")?.remove()});
+  const line=(k,lbl,type="text")=>{const i=h("input",{type,id:"ov-"+k});i.value=st.ovjera[k]||(type==="date"?new Date().toISOString().slice(0,10):"");if(!st.ovjera[k]&&type==="date"){st.ovjera[k]=i.value}i.addEventListener("input",()=>{st.ovjera[k]=i.value;save();i.parentElement.classList.remove("bad")});return [h("label",{for:"ov-"+k},lbl,k==="ime"?h("span",{style:"color:var(--err)"}," *"):null),h("div",{},i)]};
+  S.append(h("div",{class:"band"},h("span",{},"Saglasnost i ovjera")),
+    h("label",{class:"consent",for:"sagl"},sg,h("span",{},"Saglasan/na sam da se dostavljeni podaci koriste u naučno-istraživačke svrhe i objavljuju zbirno, bez navođenja naziva privrednog subjekta. ",h("span",{style:"color:var(--err)"},"*"))),
+    h("div",{class:"sign"},h("div",{class:"lines"},...line("datum","Datum popunjavanja:","date"),...line("ime","Ime i prezime:"),...line("funkcija","Funkcija:")),
+      h("div",{class:"mp"},"Online upitnik ne zahtijeva potpis i pečat")));
+
+  const btn=h("button",{class:"primary",type:"button",onclick:()=>posalji(btn)},"Pošalji upitnik");
+  S.append(h("div",{style:"position:absolute;left:-9999px","aria-hidden":"true"},h("label",{for:"website"},"Web stranica"),h("input",{type:"text",id:"website",tabindex:"-1",autocomplete:"off"})));
+  S.append(h("div",{class:"submit"},btn));
+  S.append(h("p",{class:"thanks-line"},"Hvala Vam na izdvojenom vremenu i saradnji."));
+  S.append(foot());
+}
+function foot(){
+  const f=h("div",{class:"foot"},h("span",{},"Povjerljivo – isključivo za naučno-istraživačke svrhe"),h("span",{class:"mode",id:"mode"},modeText()));
+  if(Store.admin) f.append(h("a",{href:"#odgovori"},"Pregled odgovora"));
+  return f;
+}
+const modeText=()=>Store.kind==="gas"?"Odgovori se šalju istraživačkom timu":"Probni način: SCRIPT_URL nije podešen";
+
+function provjeri(){
+  let first=null;
+  document.querySelectorAll(".row .msg,#sagl-msg").forEach(e=>e.remove());
+  document.querySelectorAll(".bad").forEach(e=>e.classList.remove("bad"));
+  S1.filter(f=>f.req).forEach(f=>{ if(!(st.firma[f.k]||"").trim()){const r=document.querySelector(`.row[data-k="${f.k}"]`);r.classList.add("bad");r.querySelector(".a").append(h("div",{class:"msg"},"Ovo polje je obavezno."));first=first||r} });
+  if(!(st.ovjera.ime||"").trim()){const i=$("#ov-ime");i.parentElement.classList.add("bad");i.parentElement.append(h("div",{class:"msg"},"Upišite ime i prezime."));first=first||i}
+  if(!st.saglasnost){const c=$(".consent");c.after(h("div",{class:"msg",id:"sagl-msg"},"Za slanje je potrebna saglasnost."));first=first||c}
+  if(first){first.scrollIntoView({behavior:"smooth",block:"center"});return false}
+  return true;
+}
+async function posalji(btn){
+  if(!provjeri())return;
+  btn.disabled=true;btn.textContent="Šaljem…";
+  const r={id:sifra(),poslano:new Date().toISOString(),firma:st.firma,kotlovi:st.kotlovi,napomene:st.napomene||"",saglasnost:true,ovjera:st.ovjera};
+  try{await Store.save(r);ls.del(DK);st={firma:{},kotlovi:[{}],napomene:"",saglasnost:false,ovjera:{}};sent=r;renderForm();window.scrollTo({top:0})}
+  catch(e){btn.disabled=false;btn.textContent="Pošalji upitnik";toast("Slanje nije uspjelo. Provjerite internet vezu i pokušajte ponovo; uneseni podaci su sačuvani.")}
+}
+
+/* ---------- pregled odgovora (samo autor i urednici) ---------- */
+let unsub=null, data=[], izbor=null;
+const fmtV=v=>v==null?"":Array.isArray(v)?v.filter(Boolean).join(" / "):typeof v==="object"?Object.entries(v).map(([k,x])=>x===true?k:k+" "+x).join("; "):String(v);
+function renderAdmin(){
+  const S=$("#sheet"); S.replaceChildren();
+  S.append(h("div",{class:"runhead"},h("span",{},"Pregled odgovora"),h("a",{href:"#"},"← Nazad na upitnik")));
+  if(!Store.admin){S.append(h("p",{},"Pregled odgovora je dostupan samo istraživačima."));return}
+  const wrap=h("div",{class:"admin"},h("h2",{},"Pristigli upitnici"),h("p",{class:"mode"},modeText()));
+  const bar=h("div",{class:"bar"},h("button",{type:"button",onclick:izvoz},"Izvoz u Excel"));
+  const tbl=h("div",{class:"tbl",id:"tbl"}); const det=h("div",{id:"det"});
+  wrap.append(bar,tbl,det); S.append(wrap); crtaj();
+  if(!unsub){const t=setTimeout(()=>toast("Baza sporo odgovara…"),10000);unsub=Store.watch(l=>{clearTimeout(t);data=l;if(location.hash==="#odgovori")crtaj()},e=>{clearTimeout(t);toast("Čitanje baze nije uspjelo.")})}
+}
+function crtaj(){
+  const T=$("#tbl"); if(!T)return;
+  if(!data.length){T.replaceChildren(h("p",{style:"padding:24px;text-align:center;color:var(--muted)"},"Još nema poslanih upitnika. Kad firma pošalje upitnik, pojavit će se ovdje."));$("#det").replaceChildren();return}
+  T.replaceChildren(h("table",{},h("thead",{},h("tr",{},...["Šifra","Datum","Privredni subjekt","Kontakt","Kotlova","Gorivo (kotao 1)","Nazivni kapacitet (kotao 1)"].map(x=>h("th",{},x)))),
+    h("tbody",{},...data.map(r=>h("tr",{tabindex:0,onclick:()=>{izbor=r;detalj()},onkeydown:e=>{if(e.key==="Enter"){izbor=r;detalj()}}},
+      h("td",{},r.id),h("td",{},new Date(r.poslano).toLocaleDateString("bs-BA")),h("td",{},r.firma?.["1.1"]||""),h("td",{},r.firma?.["1.3"]||""),
+      h("td",{},String(r.kotlovi?.length||0)),h("td",{},fmtV(r.kotlovi?.[0]?.["4.1"])),h("td",{},r.kotlovi?.[0]?.["2.5"]||""))))));
+  if(izbor&&!data.find(x=>x.id===izbor.id)){izbor=null} detalj();
+}
+function detalj(){
+  const D=$("#det"); if(!D)return; if(!izbor){D.replaceChildren();return}
+  const r=izbor, dl=(fs,o)=>h("dl",{},...fs.flatMap(f=>[h("dt",{},f.k+" "+f.q),h("dd",{},fmtV(o?.[f.k])||"–")]));
+  const box=h("div",{class:"det"},h("div",{style:"display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"},h("b",{},`${r.id} · ${r.firma?.["1.1"]||""}`),h("button",{class:"link",type:"button",onclick:()=>{izbor=null;detalj()}},"Zatvori")),
+    h("h3",{},"1. Opći podaci"),dl(S1,r.firma));
+  (r.kotlovi||[]).forEach((k,i)=>KOTAO.forEach(([t,fs])=>box.append(h("h3",{},`${t} – kotao br. ${i+1}`),dl(fs.filter(f=>!(f.plant&&i>0)),k))));
+  box.append(h("h3",{},"5. Dodatne napomene"),h("p",{},r.napomene||"–"),h("h3",{},"Ovjera"),h("p",{},`${r.ovjera?.ime||""}, ${r.ovjera?.funkcija||""} · ${r.ovjera?.datum||""}`));
+  const zone=h("div",{style:"margin-top:8px"});
+  const del=h("button",{type:"button",onclick:()=>zone.replaceChildren(del,h("span",{class:"confirm"},"Trajno obrisati ovaj upitnik?",h("button",{type:"button",onclick:async()=>{try{await Store.remove(r.id);izbor=null;toast("Upitnik obrisan.");if(Store.kind!=="db"){data=data.filter(x=>x.id!==r.id);crtaj()}}catch{toast("Brisanje nije uspjelo.")}}},"Obriši"),h("button",{type:"button",onclick:()=>zone.replaceChildren(del)},"Odustani")))},"Obriši upitnik");
+  zone.append(del); box.append(zone); D.replaceChildren(box);
+}
+async function izvoz(){
+  if(!data.length)return toast("Nema podataka za izvoz.");
+  if(!window.XLSX)return toast("Biblioteka za Excel se nije učitala.");
+  const firme=data.map(r=>({"Šifra":r.id,"Datum slanja":r.poslano.slice(0,10),...Object.fromEntries(S1.map(f=>[f.k+" "+f.q,fmtV(r.firma?.[f.k])])),"Broj upisanih kotlova":r.kotlovi?.length||0,"5. Dodatne napomene":r.napomene,"Popunio/la":r.ovjera?.ime,"Funkcija":r.ovjera?.funkcija,"Datum popunjavanja":r.ovjera?.datum}));
+  const kot=data.flatMap(r=>(r.kotlovi||[]).map((k,i)=>({"Šifra":r.id,"Privredni subjekt":r.firma?.["1.1"],"Kotao br.":i+1,...Object.fromEntries([...S2,...S3,...S4].map(f=>[f.k+" "+f.q,fmtV(k[f.k])]))})));
+  const wb=XLSX.utils.book_new();
+  const w1=XLSX.utils.json_to_sheet(firme), w2=XLSX.utils.json_to_sheet(kot);
+  w1["!cols"]=Object.keys(firme[0]).map(()=>({wch:28})); w2["!cols"]=Object.keys(kot[0]||{}).map(()=>({wch:24}));
+  XLSX.utils.book_append_sheet(wb,w1,"Privredni subjekti"); XLSX.utils.book_append_sheet(wb,w2,"Kotlovi");
+  const blob=new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  const name=`upitnici_kotlovska_postrojenja_${new Date().toISOString().slice(0,10)}.xlsx`;
+  const dl=window.claude?.use?await claude.use("downloads").catch(()=>null):null;
+  if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(e?.code!=="cancelled"&&e?.code!=="declined")toast("Preuzimanje nije uspjelo.")}return}
+  const a=h("a",{href:URL.createObjectURL(blob),download:name});document.body.append(a);a.click();setTimeout(()=>a.remove(),300);
+}
+
+/* ---------- pokretanje ---------- */
+function route(){ renderForm(); }
+window.addEventListener("hashchange",route);
+route();
+Store.init().then(route);
+</script>
+</body>
+</html>
